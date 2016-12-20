@@ -1,0 +1,207 @@
+﻿<Window x:Class="Lab2.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:Lab2"
+        xmlns:sys="clr-namespace:System;assembly=mscorlib"
+        mc:Ignorable="d"
+        Title="MainWindow" Height="469" Width="953" MinHeight="361">
+    <Window.Resources>
+        <!--ошибка валидации-->
+        <ControlTemplate x:Key="validationErrorTemplate">
+            <DockPanel>
+                <StackPanel Orientation="Horizontal" DockPanel.Dock="Top">
+                    <Grid Width="12" Height="12">
+                        <Ellipse Width="12" Height="12" 
+            Fill="Red" HorizontalAlignment="Center" 
+            VerticalAlignment="Center"
+                     
+                     ></Ellipse>
+                        <TextBlock Foreground="White" FontWeight="Heavy" 
+            FontSize="8" HorizontalAlignment="Center" 
+            VerticalAlignment="Center" TextAlignment="Center"
+                       ToolTip="{Binding ElementName=ErrorAdorner, 
+                       Path=AdornedElement.(Validation.Errors)[0].ErrorContent}"
+                       >X</TextBlock>
+                    </Grid>
+                    <TextBlock Foreground="Red" FontSize="12" Margin="2,0,0,0" 
+                   Text="{Binding ElementName=ErrorAdorner, 
+                   Path=AdornedElement.(Validation.Errors)[0].ErrorContent}"
+                   ></TextBlock>
+                </StackPanel>
+                <AdornedElementPlaceholder 
+        x:Name="ErrorAdorner" ></AdornedElementPlaceholder>
+            </DockPanel>
+        </ControlTemplate>
+        <Style TargetType="TextBox">
+            <Style.Triggers>
+                <Trigger Property="Validation.HasError" Value="True">
+                    <Setter Property="ToolTip"
+                Value="{Binding RelativeSource={RelativeSource Self},
+                    Path=(Validation.Errors)[0].ErrorContent}" />
+                    <Setter Property="Foreground" Value="Red" />
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+        <!--группировка-->
+        <Style x:Key="GroupHeaderStyle"
+               TargetType="{x:Type GroupItem}">
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type GroupItem}">
+                        <Expander x:Name="exp" IsExpanded="True" Background="#c9c9c9c9" Foreground="Black">
+                            <Expander.Header>
+                                <TextBlock Text="{Binding Name}" Background="#c9c9c9c9"></TextBlock>
+                            </Expander.Header>
+                            <Expander.Content>
+                                <ItemsPresenter/>
+                            </Expander.Content>
+                        </Expander>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!--Цвета-->
+        <SolidColorBrush x:Key="moreColor" Color="LightCoral"/>
+        <SolidColorBrush x:Key="inColor" Color="Yellow"/>
+        <SolidColorBrush x:Key="lessColor" Color="LightGreen"/>
+        <!--Подсветка-->
+        <Style TargetType="DataGridRow" x:Key="DataGridShipsRowStyle" >
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding State}" Value="Less" >
+                    <Setter Property="Background" Value="{StaticResource lessColor}"/>
+                </DataTrigger>
+                <DataTrigger Binding="{Binding State}" Value="In" >
+                    <Setter Property="Background" Value="{StaticResource inColor}" />
+                </DataTrigger>
+                <DataTrigger Binding="{Binding State}" Value="More" >
+                    <Setter Property="Background" Value="{StaticResource moreColor}" />
+                </DataTrigger>
+                <DataTrigger Binding="{Binding State}" Value="Incorrect" >
+                    <Setter Property="Background" Value="White" />
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+        <!--Конвертеры-->
+        <local:NullableToStringConverter x:Key="NullableToString"/>
+    </Window.Resources>
+    <Window.DataContext>
+        <local:ApplicationViewModel/>
+    </Window.DataContext>
+
+    <Grid Margin="0,0,2,0">
+        <DataGrid x:Name="dataGrid" Margin="10,10,282,10" ItemsSource="{Binding Collection, UpdateSourceTrigger=PropertyChanged}" SelectedItem="{Binding SelectedShip}" AutoGenerateColumns="False" 
+                  CanUserAddRows="False" CanUserDeleteRows="False" CanUserResizeRows="False" HorizontalScrollBarVisibility="Disabled"
+                  RowStyle="{DynamicResource DataGridShipsRowStyle}" SelectionMode="Single">
+            <DataGrid.CellStyle>
+                <Style TargetType="DataGridCell">
+                    <Setter Property="BorderThickness" Value="0"/>
+                </Style>
+            </DataGrid.CellStyle>
+            <DataGrid.GroupStyle>
+                <GroupStyle ContainerStyle="{StaticResource GroupHeaderStyle}">
+                    <GroupStyle.Panel>
+                        <ItemsPanelTemplate>
+                            <DataGridRowsPresenter/>
+                        </ItemsPanelTemplate>
+                    </GroupStyle.Panel>
+                </GroupStyle>
+            </DataGrid.GroupStyle>
+            <DataGrid.Columns>
+                <DataGridTextColumn Binding="{Binding Path=Name, Converter={StaticResource NullableToString}}" Header="Название" CanUserReorder="False" Width="30*"/>
+                <DataGridTextColumn Binding="{Binding Path=Class, Converter={StaticResource NullableToString}}" Header="Класс" CanUserReorder="False" Width="20*"/>
+                <DataGridTextColumn Binding="{Binding Path=Type, Converter={StaticResource NullableToString}}" CanUserReorder="False" Header="Тип"/>
+                <DataGridTextColumn Binding="{Binding Path=Launched, Converter={StaticResource NullableToString}}" CanUserReorder="False" Header="Спущен на воду"/>
+                <DataGridTextColumn Binding="{Binding Path=NumGuns, Converter={StaticResource NullableToString}}" CanUserReorder="False" Header="Число орудий ГК"/>
+                <DataGridTextColumn Binding="{Binding Path=Caliber, Converter={StaticResource NullableToString}}" CanUserReorder="False" Header="Калибр ГК"/>
+            </DataGrid.Columns>
+        </DataGrid>
+        <Label x:Name="label1" Content="Редактирование" Margin="0,10,175,0" VerticalAlignment="Top" HorizontalAlignment="Right" Width="100"/>
+        <StackPanel Height="257" Margin="0,36,8,0" VerticalAlignment="Top" HorizontalAlignment="Right" Width="267" DataContext="{Binding SelectedShip}">
+            <Grid Height="257">
+                <Label x:Name="labelName" Content="Название:" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="0,15,0,0"/>
+                <Label x:Name="labelType" Content="Класс:" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="0,59,0,0"/>
+                <Label x:Name="labelModel" Content="Тип:" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="0,100,0,0"/>
+                <Label x:Name="labelLaunched" Content="Год спуска на воду:" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="0,140,0,0"/>
+                <TextBox x:Name="Name" Height="23" Margin="70,18,10,0" VerticalAlignment="Top" 
+                         Text="{Binding Name, Mode=TwoWay, NotifyOnValidationError=True, UpdateSourceTrigger=PropertyChanged}"/>
+                <TextBox x:Name="Class" Height="23" Margin="51,59,10,0" Text="{Binding Class}" VerticalAlignment="Top"/>
+                <TextBox x:Name="Launched" Height="23" Margin="121,143,13,0" VerticalAlignment="Top" 
+                         Validation.ErrorTemplate="{StaticResource validationErrorTemplate}">
+                    <Binding Path="Launched" Mode="TwoWay" NotifyOnValidationError="True" UpdateSourceTrigger="PropertyChanged" 
+                             TargetNullValue="{x:Static sys:String.Empty}">
+                        <Binding.ValidationRules>
+                            <local:LanchedValidationRule/>
+                        </Binding.ValidationRules>
+                    </Binding>
+                </TextBox>
+                <Label x:Name="labelWeaponry_Copy" Content="Число орудий ГК:" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="-3,182,0,0"/>
+                <TextBox x:Name="NumGuns" HorizontalAlignment="Left" Height="23" Margin="103,185,0,0" VerticalAlignment="Top" Width="151" 
+                         Validation.ErrorTemplate="{StaticResource validationErrorTemplate}">
+                    <Binding Path="NumGuns" Mode="TwoWay" NotifyOnValidationError="True" UpdateSourceTrigger="PropertyChanged" 
+                             TargetNullValue="{x:Static sys:String.Empty}">
+                        <Binding.ValidationRules>
+                            <local:NotRequiredIntValidationRule/>
+                        </Binding.ValidationRules>
+                    </Binding>
+                </TextBox>
+                <Label x:Name="labelCaliber" Content="Калибр орудий ГК:" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="0,223,0,0"/>
+                <TextBox x:Name="Caliber" Height="23" Margin="113,226,13,0" VerticalAlignment="Top"
+                         Validation.ErrorTemplate="{StaticResource validationErrorTemplate}">
+                    <Binding Path="Caliber" Mode="TwoWay" NotifyOnValidationError="True" UpdateSourceTrigger="PropertyChanged" 
+                             TargetNullValue="{x:Static sys:String.Empty}">
+                        <Binding.ValidationRules>
+                            <local:NotRequiredIntValidationRule/>
+                        </Binding.ValidationRules>
+                    </Binding>
+                </TextBox>
+                <ComboBox x:Name="comboBox" HorizontalAlignment="Left" Margin="51,104,0,0" VerticalAlignment="Top" Width="203"
+                          ItemsSource="{Binding Types}" 
+                          SelectedItem="{Binding Type}"/>
+            </Grid>
+        </StackPanel>
+        <DockPanel LastChildFill="False" Margin="0,320,10,0" HorizontalAlignment="Right" Width="265" Height="108" VerticalAlignment="Top">
+            <Grid Height="108" VerticalAlignment="Top" Width="264">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="59*"/>
+                    <ColumnDefinition Width="73*"/>
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="16*"/>
+                    <RowDefinition Height="17*"/>
+                    <RowDefinition Height="16*"/>
+                </Grid.RowDefinitions>
+                <Label x:Name="label" Content="Калибр орудий ГК" RenderTransformOrigin="0.457,0.474" Height="26" VerticalAlignment="Top" HorizontalAlignment="Left" Width="128" Grid.ColumnSpan="2"/>
+                <Label x:Name="label_Copy" Content="от" Margin="13,0,0,0" RenderTransformOrigin="0.457,0.474" HorizontalAlignment="Left" Width="22" Height="26" VerticalAlignment="Top" Grid.Row="1"/>
+                <TextBox x:Name="textBoxFrom" Margin="37,4,0,0" TextWrapping="Wrap" Height="23" VerticalAlignment="Top" Grid.Row="1"
+                         Validation.ErrorTemplate="{StaticResource validationErrorTemplate}" HorizontalAlignment="Left" Width="56">
+                    <Binding Path="FilterMinCaliber" Mode="TwoWay" NotifyOnValidationError="True" UpdateSourceTrigger="PropertyChanged" 
+                             TargetNullValue="{x:Static sys:String.Empty}">
+                        <Binding.ValidationRules>
+                            <local:NonNegativeValidationRule/>
+                        </Binding.ValidationRules>
+                    </Binding>
+                </TextBox>
+                <Label x:Name="label_Copy1" Content="до" HorizontalAlignment="Left" Margin="13,2,0,0" VerticalAlignment="Top" RenderTransformOrigin="0.457,0.474" Grid.Row="2" Height="26" Width="24"/>
+                <TextBox x:Name="textBoxTo" Margin="37,6,0,0" TextWrapping="Wrap" Height="23" VerticalAlignment="Top" Grid.Row="2"
+                    Validation.ErrorTemplate="{StaticResource validationErrorTemplate}" HorizontalAlignment="Left" Width="56">
+                    <Binding Path="FilterMaxCaliber" Mode="TwoWay" NotifyOnValidationError="True" UpdateSourceTrigger="PropertyChanged" 
+                             TargetNullValue="{x:Static sys:String.Empty}">
+                        <Binding.ValidationRules>
+                            <local:NonNegativeValidationRule/>
+                        </Binding.ValidationRules>
+                    </Binding>
+                </TextBox>
+                <Rectangle Fill="{StaticResource lessColor}" HorizontalAlignment="Left" Height="8" Margin="20,10,0,0" Stroke="Black" VerticalAlignment="Top" Width="8" RenderTransformOrigin="3.26,0.922" Grid.Column="1"/>
+                <Label x:Name="label2" Content="меньше диапазна" Grid.Column="1" HorizontalAlignment="Left" Margin="33,0,0,0" VerticalAlignment="Top" Height="28" Width="108"/>
+                <Rectangle Fill="{StaticResource inColor}" HorizontalAlignment="Left" Height="8" Margin="20,14,0,0" Stroke="Black" VerticalAlignment="Top" Width="8" RenderTransformOrigin="3.26,0.922" Grid.Column="1" Grid.Row="1"/>
+                <Label x:Name="label2_Copy" Content="в диапазоне" Grid.Column="1" HorizontalAlignment="Left" Margin="33,4,0,0" VerticalAlignment="Top" Height="28" Grid.Row="1" Width="78"/>
+                <Rectangle Fill="{StaticResource moreColor}" HorizontalAlignment="Left" Height="8" Margin="20,13,0,0" Stroke="Black" VerticalAlignment="Top" Width="8" RenderTransformOrigin="3.26,0.922" Grid.Column="1" Grid.Row="2"/>
+                <Label x:Name="label2_Copy1" Content="больше диапазона" Grid.Column="1" HorizontalAlignment="Left" Margin="33,3,0,0" VerticalAlignment="Top" Height="28" Grid.Row="2" Width="113"/>
+            </Grid>
+        </DockPanel>
+    </Grid>
+</Window>
